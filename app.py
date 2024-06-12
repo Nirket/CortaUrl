@@ -45,6 +45,12 @@ def shorten_url():
     if not long_url:
         return jsonify({"error": "No URL provided"}), 400
 
+    # Verificar si la URL ya existe en la base de datos
+    existing_url = URL.query.filter_by(original_url=long_url).first()
+    if existing_url:
+        short_url = f"https://CortaURL.com/{existing_url.short_code}"
+        return jsonify({"message": "CortaURL", "short_url": short_url})
+
     short_code = generate_short_code()
     new_url = URL(original_url=long_url, short_code=short_code)
     db.session.add(new_url)
@@ -63,3 +69,4 @@ def redirect_to_url(short_code):
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))  # Asegurarse de que el puerto esté configurado
     app.run(debug=True, host='0.0.0.0', port=port)
+
