@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, redirect
+from flask import Flask, request, jsonify, redirect, render_template
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import create_engine
 import string
@@ -34,10 +34,6 @@ def generate_short_code():
 with app.app_context():
     db.create_all()
 
-@app.route('/')
-def home():
-    return jsonify({"message": "¡Bienvenido a CortaURL!"})
-
 @app.route('/', methods=['GET', 'POST'])
 def home():
     if request.method == 'POST':
@@ -47,14 +43,14 @@ def home():
             return render_template('index.html', error="No se proporcionó una URL.")
         
         # Lógica para acortar la URL y devolver el enlace corto
-        short_url = obtener_enlace_corto(long_url)
+        short_url = shorten_url(long_url)
         return render_template('index.html', short_url=short_url)
     
     # Si la solicitud es GET, simplemente renderiza la plantilla
     return render_template('index.html')
 
 @app.route('/shorten', methods=['POST'])
-def shorten_url():
+def shorten_url(long_url):
     data = request.get_json()
     long_url = data.get("url")
     if not long_url:
@@ -84,4 +80,5 @@ def redirect_to_url(short_code):
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))  # Asegurarse de que el puerto esté configurado
     app.run(debug=True, host='0.0.0.0', port=port)
+
 
