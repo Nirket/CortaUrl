@@ -17,8 +17,7 @@ def generate_short_code():
     characters = string.ascii_letters + string.digits
     return ''.join(random.choice(characters) for _ in range(6))
 
-@app.before_first_request
-def create_tables():
+with app.app_context():
     db.create_all()
 
 @app.route('/')
