@@ -2,8 +2,15 @@ from flask import Flask, request, jsonify, redirect
 from flask_sqlalchemy import SQLAlchemy
 import string
 import random
+import os
 
 app = Flask(__name__)
+
+# Crear el directorio instance si no existe
+if not os.path.exists('instance'):
+    os.makedirs('instance')
+
+# Configuración de la base de datos
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///instance/cortaurl.sqlite'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
@@ -17,6 +24,7 @@ def generate_short_code():
     characters = string.ascii_letters + string.digits
     return ''.join(random.choice(characters) for _ in range(6))
 
+# Crear tablas de la base de datos en la inicialización de la aplicación
 with app.app_context():
     db.create_all()
 
@@ -47,4 +55,6 @@ def redirect_to_url(short_code):
     return jsonify({"error": "Invalid URL"}), 404
 
 if __name__ == '__main__':
+    port = int(os.environ.get('PORT', 5000))  # Asegurarse de que el puerto esté configurado
     app.run(debug=True, host='0.0.0.0', port=port)
+
