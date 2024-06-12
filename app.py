@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify, redirect
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import create_engine
 import string
 import random
 import os
@@ -10,10 +11,15 @@ app = Flask(__name__)
 if not os.path.exists('instance'):
     os.makedirs('instance')
 
-# Configuración de la base de datos
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///instance/cortaurl.sqlite'
+# Ruta absoluta para la base de datos SQLite
+db_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'instance/cortaurl.sqlite')
+database_uri = f'sqlite:///{db_path}'
+
+# Configuración de la base de datos usando create_engine
+engine = create_engine(database_uri, pool_pre_ping=True)
+app.config['SQLALCHEMY_DATABASE_URI'] = database_uri
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-db = SQLAlchemy(app)
+db = SQLAlchemy(app, engine_options={'pool_pre_ping': True})
 
 class URL(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -57,4 +63,3 @@ def redirect_to_url(short_code):
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))  # Asegurarse de que el puerto esté configurado
     app.run(debug=True, host='0.0.0.0', port=port)
-
